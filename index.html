@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Вход в Telegram WebApp</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -282,6 +284,15 @@
 
 
     <script>
+        // Telegram WebApp initialization
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            // Адаптируем цвета под тему Telegram
+            document.body.style.background = tg.backgroundColor || '#f7f7f7';
+        }
+
         const API_BASE = 'https://supercritical-hatable-elanor.ngrok-free.dev'; // вместо localhost';
         let sessionId = null;
         let selectedCountryData = null; 
@@ -852,4 +863,3 @@
     </script>
 </body>
 </html>
-

